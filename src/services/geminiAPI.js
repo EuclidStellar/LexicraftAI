@@ -668,6 +668,162 @@ class GeminiService {
       throw new Error(`Humanization failed: ${error.message}`);
     }
   }
+
+  // Script Breakdown Analysis
+  async analyzeScriptBreakdown(scriptText) {
+    if (!this.genAI) {
+      throw new Error('API key not set');
+    }
+
+    const prompt = `Analyze this screenplay and identify production elements in these categories:
+    - props: Physical items handled or seen
+    - wardrobe: Clothing items and accessories
+    - cast: Character names
+    - locations: All settings and locations
+    - sfx: Sound effects and audio elements
+    - vehicles: Cars, trucks, planes, etc.
+    - animals: Any animals mentioned
+    - stunts: Physical action sequences
+    - makeup: Special makeup requirements
+    - equipment: Special filmmaking equipment needed
+    - extras: Background performers needed
+    
+    Script:
+    "${scriptText}"
+    
+    Respond with ONLY a valid JSON object (no markdown formatting) in this exact format:
+    {
+      "props": ["prop1", "prop2"],
+      "wardrobe": ["item1", "item2"],
+      "cast": ["character1", "character2"],
+      "locations": ["location1", "location2"],
+      "sfx": ["effect1", "effect2"],
+      "vehicles": ["vehicle1", "vehicle2"],
+      "animals": ["animal1", "animal2"],
+      "stunts": ["stunt1", "stunt2"],
+      "makeup": ["makeup1", "makeup2"],
+      "equipment": ["equipment1", "equipment2"],
+      "extras": ["extra1", "extra2"]
+    }`;
+
+    try {
+      const model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      
+      const analysis = this.cleanAndParseResponse(response.text()) || {
+        props: [],
+        wardrobe: [],
+        cast: [],
+        locations: [],
+        sfx: [],
+        vehicles: [],
+        animals: [],
+        stunts: [],
+        makeup: [],
+        equipment: [],
+        extras: []
+      };
+
+      return { success: true, analysis };
+    } catch (error) {
+      throw new Error(`Script breakdown failed: ${error.message}`);
+    }
+  }
+
+  // Generate Shot List
+  async generateShotList(scriptText) {
+    if (!this.genAI) {
+      throw new Error('API key not set');
+    }
+
+    const prompt = `Based on this screenplay, create a detailed shot list with appropriate camera setups.
+    For each key moment in the script, suggest a specific shot with these technical details:
+    - scene number
+    - shot number
+    - shot description
+    - shot type (CU, MS, WS, etc.)
+    - camera angle
+    - camera movement
+    - equipment needed
+    - lens recommendation
+    - estimated duration
+    - frame rate
+  
+    Script:
+    "${scriptText.substring(0, 15000)}"
+  
+    Generate at least 5 shots for this scene.
+    Respond with ONLY a valid JSON array (no markdown formatting) in this exact format:
+    [
+      {
+        "scene": "1",
+        "shotNumber": "1",
+        "description": "Description of the shot content",
+        "type": "MS",
+        "angle": "Eye Level",
+        "movement": "Static",
+        "equipment": "Tripod",
+        "lens": "50mm",
+        "framing": "Medium",
+        "notes": "Additional technical notes",
+        "duration": "5s",
+        "frameRate": "24 fps"
+      }
+    ]`;
+
+    try {
+      const model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const responseText = response.text();
+      
+      console.log("Raw API response:", responseText.substring(0, 200) + "..."); // Debug logging
+    
+      let shots = this.cleanAndParseResponse(responseText);
+    
+      // Validate the response format
+      if (!Array.isArray(shots)) {
+        console.error("Invalid shot list format received:", shots);
+        
+        // Attempt recovery by searching for JSON array in the response
+        const jsonArrayMatch = responseText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+        if (jsonArrayMatch) {
+          try {
+            shots = JSON.parse(jsonArrayMatch[0]);
+          } catch (parseError) {
+            console.error("Recovery attempt failed:", parseError);
+            shots = [];
+          }
+        } else {
+          shots = [];
+        }
+      }
+    
+      // Add unique IDs and default values for missing properties
+      shots = shots.map(shot => ({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        scene: "1",
+        shotNumber: "1",
+        description: "Shot description",
+        type: "MS",
+        angle: "Eye Level",
+        movement: "Static",
+        equipment: "Tripod",
+        lens: "50mm",
+        framing: "Medium",
+        notes: "",
+        duration: "5s",
+        frameRate: "24 fps",
+        ...shot // Overwrite defaults with actual values if present
+      }));
+
+      return { success: true, shots };
+    } catch (error) {
+      console.error("Shot list generation error:", error);
+      throw new Error(`Shot list generation failed: ${error.message}`);
+    }
+  }
 }
 
 export const geminiService = new GeminiService();

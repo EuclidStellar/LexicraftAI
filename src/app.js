@@ -12,6 +12,8 @@ import PlotAnalyzer from './components/PlotAnalyzer';
 import ManuscriptManager from './components/ManuscriptManager';
 import SceneBuilder from './components/SceneBuilder';
 import ReadabilityOptimizer from './components/ReadabilityOptimizer';
+import ScriptBreakdown from './components/ScriptBreakdown';
+import ShotListManager from './components/ShotListManager';
 import Navigation from './components/Navigation';
 
 const App = () => {
@@ -32,6 +34,8 @@ const App = () => {
             <Route path="/manuscript-manager" element={<ManuscriptManager />} />
             <Route path="/scene-builder" element={<SceneBuilder />} />
             <Route path="/readability-optimizer" element={<ReadabilityOptimizer />} />
+            <Route path="/script-breakdown" element={<ScriptBreakdown />} />
+            <Route path="/shot-list-manager" element={<ShotListManager />} />
           </Routes>
         </main>
       </div>
