@@ -1,0 +1,1 @@
+console.log("Plagiarism checker initialized");
