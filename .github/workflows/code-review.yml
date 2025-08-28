@@ -20,4 +20,4 @@ jobs:
       - name: Run Smart AI Code Review
         uses: euclidstellar/code-review-agent@v1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GH_SECRET }}
