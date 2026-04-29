@@ -36,6 +36,7 @@ const Navigation = () => {
     { path: '/manuscript-manager', label: 'Manuscript Manager', icon: '›' },
     { path: '/scene-builder', label: 'Scene Builder', icon: '›' },
     { path: '/readability-optimizer', label: 'Readability', icon: '›' },
+    { path: '/plagiarism-checker', label: 'Plagiarism Checker', icon: '›' },
     { path: '/summarizer', label: 'Summarizer', icon: '›' },
     { path: '/tone-analyzer', label: 'Tone Analyzer', icon: '›' }
   ];
